@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd"
+         updateCheck="false" monitoring="autodetect"
+         dynamicConfig="true">
+
+    <cache name="persons" 
+            maxEntriesLocalHeap="1000000"
+            eternal="false"
+            memoryStoreEvictionPolicy="FIFO">
+        <searchable>
+        	<searchAttribute name="lastname"/>
+        	<searchAttribute name="gender"/>
+        	<searchAttribute name="country"/>
+        </searchable>
+    </cache>
+
+</ehcache>
