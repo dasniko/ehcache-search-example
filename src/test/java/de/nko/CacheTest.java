@@ -15,13 +15,13 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.search.Attribute;
 import net.sf.ehcache.search.Query;
 import net.sf.ehcache.search.Results;
+import net.sf.ehcache.search.expression.Criteria;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 @Slf4j
 public class CacheTest {
-
     private static Cache cache = CacheManager.getInstance().getCache("persons");
     private static Attribute<String> lastname = cache.getSearchAttribute("lastname");
     private static Attribute<String> gender = cache.getSearchAttribute("gender");
@@ -36,55 +36,47 @@ public class CacheTest {
     @Test
     public void searchLastnameSmith() throws Exception {
         log.info("Preparing search for lastname='Smith'...");
-        Query query = cache.createQuery().includeValues().addCriteria(lastname.eq("Smith")).end();
-        int n = performSearch(query);
+        int n = performSearch(lastname.eq("Smith"));
         assertEquals(3890, n);
     }
 
     @Test
     public void searchGenderM() throws Exception {
         log.info("Preparing search for gender='M'...");
-        Query query = cache.createQuery().includeValues().addCriteria(gender.eq("M")).end();
-        int n = performSearch(query);
+        int n = performSearch(gender.eq("M"));
         assertEquals(499530, n);
     }
 
     @Test
     public void searchCountryGermany() throws Exception {
         log.info("Preparing search for country='Germany'...");
-        Query query = cache.createQuery().includeValues().addCriteria(country.eq("Germany")).end();
-        int n = performSearch(query);
+        int n = performSearch(country.eq("Germany"));
         assertEquals(4010, n);
     }
 
     @Test
     public void searchGenderFCountryFrance() throws Exception {
         log.info("Preparing search for gender='F' and country='France'...");
-        Query query = cache.createQuery().includeValues().addCriteria(gender.eq("F")).addCriteria(country.eq("France"))
-                .end();
-        int n = performSearch(query);
+        int n = performSearch(gender.eq("F"), country.eq("France"));
         assertEquals(1940, n);
     }
 
     @Test
     public void searchGenderMLastnameSchmidt() throws Exception {
         log.info("Preparing search for gender='M' and lastname='Schmidt'...");
-        Query query = cache.createQuery().includeValues().addCriteria(gender.eq("M"))
-                .addCriteria(lastname.eq("Schmidt")).end();
-        int n = performSearch(query);
+        int n = performSearch(gender.eq("M"), lastname.eq("Schmidt"));
         assertEquals(2240, n);
     }
 
     @Test
     public void searchLastnameJonesCountryUSA() throws Exception {
         log.info("Preparing search for lastname='Jones' and country = 'United States of America'");
-        Query query = cache.createQuery().includeValues().addCriteria(lastname.eq("Jones"))
-                .addCriteria(country.eq("United States of America")).end();
-        int n = performSearch(query);
+        int n = performSearch(lastname.eq("Jones"), country.eq("United States of America"));
         assertEquals(30, n);
     }
 
-    private int performSearch(Query query) {
+    private int performSearch(Criteria... criteria) {
+        Query query = createQuery(criteria);
         long start = System.currentTimeMillis();
         Results results = query.execute();
         int count = results.size();
@@ -92,6 +84,15 @@ public class CacheTest {
         log.info("Searchresult: found {} persons in {} ms.", count, duration);
         results.discard();
         return count;
+    }
+
+    private Query createQuery(Criteria... criteria) {
+        Query query = cache.createQuery().includeValues();
+        for (Criteria crit : criteria) {
+            query.addCriteria(crit);
+        }
+        query.end();
+        return query;
     }
 
     private static void populateCache(List<Person> persons) {
