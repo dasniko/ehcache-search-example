@@ -1,5 +1,7 @@
 package de.nko;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,51 +36,62 @@ public class CacheTest {
     @Test
     public void searchLastnameSmith() throws Exception {
         log.info("Preparing search for lastname='Smith'...");
-        long start = System.currentTimeMillis();
         Query query = cache.createQuery().includeValues().addCriteria(lastname.eq("Smith")).end();
-        performSearch(start, query);
+        int n = performSearch(query);
+        assertEquals(3890, n);
     }
 
     @Test
     public void searchGenderM() throws Exception {
         log.info("Preparing search for gender='M'...");
-        long start = System.currentTimeMillis();
         Query query = cache.createQuery().includeValues().addCriteria(gender.eq("M")).end();
-        performSearch(start, query);
+        int n = performSearch(query);
+        assertEquals(499530, n);
     }
 
     @Test
     public void searchCountryGermany() throws Exception {
         log.info("Preparing search for country='Germany'...");
-        long start = System.currentTimeMillis();
         Query query = cache.createQuery().includeValues().addCriteria(country.eq("Germany")).end();
-        performSearch(start, query);
+        int n = performSearch(query);
+        assertEquals(4010, n);
     }
 
     @Test
     public void searchGenderFCountryFrance() throws Exception {
         log.info("Preparing search for gender='F' and country='France'...");
-        long start = System.currentTimeMillis();
         Query query = cache.createQuery().includeValues().addCriteria(gender.eq("F")).addCriteria(country.eq("France"))
                 .end();
-        performSearch(start, query);
+        int n = performSearch(query);
+        assertEquals(1940, n);
     }
 
     @Test
     public void searchGenderMLastnameSchmidt() throws Exception {
         log.info("Preparing search for gender='M' and lastname='Schmidt'...");
-        long start = System.currentTimeMillis();
         Query query = cache.createQuery().includeValues().addCriteria(gender.eq("M"))
                 .addCriteria(lastname.eq("Schmidt")).end();
-        performSearch(start, query);
+        int n = performSearch(query);
+        assertEquals(2240, n);
     }
 
-    private void performSearch(long start, Query query) {
+    @Test
+    public void searchLastnameJonesCountryUSA() throws Exception {
+        log.info("Preparing search for lastname='Jones' and country = 'United States of America'");
+        Query query = cache.createQuery().includeValues().addCriteria(lastname.eq("Jones"))
+                .addCriteria(country.eq("United States of America")).end();
+        int n = performSearch(query);
+        assertEquals(30, n);
+    }
+
+    private int performSearch(Query query) {
+        long start = System.currentTimeMillis();
         Results results = query.execute();
         int count = results.size();
         long duration = System.currentTimeMillis() - start;
         log.info("Searchresult: found {} persons in {} ms.", count, duration);
         results.discard();
+        return count;
     }
 
     private static void populateCache(List<Person> persons) {
