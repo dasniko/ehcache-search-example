@@ -9,7 +9,7 @@
             maxEntriesLocalHeap="1000000"
             eternal="false"
             memoryStoreEvictionPolicy="FIFO">
-        <searchable>
+        <searchable keys="false" values="false">
         	<searchAttribute name="lastname"/>
         	<searchAttribute name="gender"/>
         	<searchAttribute name="country"/>
